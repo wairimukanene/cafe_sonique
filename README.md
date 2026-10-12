@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Café Sonique
 
-## Getting Started
+Responsive public website and secure staff workspace for Café Sonique.
 
-First, run the development server:
+## Architecture
+
+The application is a deployment-neutral Next.js modular monolith:
+
+- Next.js 16 App Router and React 19
+- PostgreSQL 17 in Docker for local development
+- Drizzle ORM and versioned SQL migrations
+- Better Auth with database sessions and email/password staff login
+- Owner and barista role enforcement in server-side data access
+- Zod validation for public and staff mutations
+- Stable local copies of approved Instagram imagery
+
+Public content is cached and tagged. Staff mutations invalidate the relevant
+menu, event or guest-thought tag. Guests can leave a short public thought.
+New notes appear on the site and in the staff Thoughts workspace; either role
+can hide a note from the public wall without deleting it. Operations run through atomic server-side transactions with
+integer KES accounting and an append-only audit trail.
+
+## Local setup
+
+Requirements: Node.js 22+, npm and Docker Desktop.
 
 ```bash
+cp .env.example .env.local
+npm install
+npm run db:up
+npm run db:migrate
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Public site: http://localhost:3000
+- Staff login: http://localhost:3000/login
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The seed credentials are read from `.env.local`. The repository’s local
+development file uses:
 
-## Learn More
+- Owner: `owner@cafesonique.local`
+- Barista: `barista@cafesonique.local`
 
-To learn more about Next.js, take a look at the following resources:
+Change both passwords and `BETTER_AUTH_SECRET` before any shared deployment.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Common commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run lint
+npm test
+npm run build
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run db:studio
+npm run db:down
+```
 
-## Deploy on Vercel
+After changing `src/lib/db/schema.ts`, run `npm run db:generate`, review the
+generated SQL under `drizzle/`, then run `npm run db:migrate`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Instagram assets
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The public site does not hotlink expiring Instagram CDN URLs. The approved
+prototype images and their source post URLs are listed in
+`scripts/instagram-assets.json`.
+
+Run this only when those explicit source URLs are still valid:
+
+```bash
+npm run assets:import-instagram
+```
+
+It downloads the files to `public/images/sonique/` and writes provenance
+metadata. Confirm Café Sonique has permission to use each photo before
+production. For ongoing imports, use the official Instagram Graph API and
+immediately copy returned media into controlled storage; do not use runtime
+scraping or CDN hotlinks.
+
+## Roles and security
+
+- `barista`: records sales, expenses, loyalty visits and stock movements, and
+  manages menu availability, events, booking enquiries and guest thoughts.
+- `owner`: has all barista access plus financial reports, M-Pesa
+  reconciliation, inventory/recipe configuration, operational settings and
+  the audit log.
+- Every protected action checks the session server-side. Navigation visibility
+  is not treated as authorization.
+- Passwords are handled by Better Auth, sessions use secure HTTP-only cookies,
+  and booking submission is validated, honeypot-protected and rate-limited.
+- Audit metadata must not contain secrets, passwords or unnecessary personal
+  information.
+
+## Backups and deployment
+
+For production, use managed PostgreSQL with automated daily backups and
+point-in-time recovery. Test restoration into a non-production database before
+launch and periodically thereafter.
+
+Deployment requires:
+
+1. A production `DATABASE_URL`.
+2. A new random `BETTER_AUTH_SECRET` of at least 32 characters.
+3. `BETTER_AUTH_URL` set to the canonical HTTPS domain.
+4. `npm run db:migrate` during a controlled release step.
+5. Rotated owner/barista passwords.
+
+Do not commit `.env.local`, database dumps or provider credentials.
+
+## Operations
+
+Open `/dashboard/operations` for quick access to the operational workspace.
+
+- Sales store immutable product/price snapshots and are completed
+  idempotently with cash or manually entered M-Pesa Buy Goods references.
+- Expenses can include receipt evidence. Development files are stored outside
+  the public web root in `.data/receipts`; metadata and SHA-256 hashes live in
+  PostgreSQL. Use private S3-compatible object storage in production.
+- Reports use `Africa/Nairobi` calendar boundaries and support CSV exports.
+- M-Pesa settlement rows are manually entered and reconciled against recorded
+  references and amounts. This is not a live Daraja integration.
+- Loyalty earns one visit per qualifying completed sale. At the configured
+  threshold (five by default), the next visit can redeem one menu drink up to
+  the configured KES cap.
+- Inventory uses an append-only movement ledger. Sales deduct stock only when
+  the owner has configured recipe quantities; no recipe amounts are assumed.
+
+Operational money is stored as integer KES. Inventory quantities use fixed
+three-decimal values. Voids create reversals or status changes rather than
+deleting financial records.
+
+For production receipt storage, implement the existing storage adapter with an
+S3-compatible private bucket, server-side encryption, short-lived signed
+downloads and retention rules. Keep bucket credentials only in deployment
+secrets.

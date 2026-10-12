@@ -1,0 +1,47 @@
+[
+  {
+    "key": "hero",
+    "path": "/images/sonique/hero.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Dd4KSc6jYve/",
+    "alt": "A Sonique barista preparing a hand-brewed coffee",
+    "width": 3405,
+    "height": 4096,
+    "importedAt": "2026-10-10T07:44:00.000Z"
+  },
+  {
+    "key": "coffee",
+    "path": "/images/sonique/coffee.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Dd4KSc6jYve/",
+    "alt": "Coffee being prepared at the Sonique bar",
+    "width": 3405,
+    "height": 4096,
+    "importedAt": "2026-10-10T07:44:00.000Z"
+  },
+  {
+    "key": "affogato",
+    "path": "/images/sonique/affogato.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Dd_cPn7Das6/",
+    "alt": "Sonique affogato with espresso and vanilla ice cream",
+    "width": 3072,
+    "height": 4096,
+    "importedAt": "2026-10-10T07:44:00.000Z"
+  },
+  {
+    "key": "vibe",
+    "path": "/images/sonique/vibe.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DdyfYuDDURh/",
+    "alt": "Friends enjoying the relaxed atmosphere at Sonique",
+    "width": 3072,
+    "height": 4096,
+    "importedAt": "2026-10-10T07:44:00.000Z"
+  },
+  {
+    "key": "work",
+    "path": "/images/sonique/montblanc.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Ddt5-uxjUZt/",
+    "alt": "Orange zest over a Mont Blanc at Sonique",
+    "width": 3072,
+    "height": 4096,
+    "importedAt": "2026-10-10T07:44:00.000Z"
+  }
+]

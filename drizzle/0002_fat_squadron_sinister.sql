@@ -1,0 +1,4 @@
+ALTER TABLE "expense" ADD CONSTRAINT "expense_amount_positive" CHECK ("expense"."amount_kes" > 0);--> statement-breakpoint
+ALTER TABLE "payment" ADD CONSTRAINT "payment_amount_positive" CHECK ("payment"."amount_kes" > 0);--> statement-breakpoint
+ALTER TABLE "sale" ADD CONSTRAINT "sale_totals_valid" CHECK ("sale"."subtotal_kes" >= 0 and "sale"."discount_total_kes" >= 0 and "sale"."total_kes" >= 0 and "sale"."total_kes" = "sale"."subtotal_kes" - "sale"."discount_total_kes");--> statement-breakpoint
+ALTER TABLE "sale_line_item" ADD CONSTRAINT "sale_line_values_valid" CHECK ("sale_line_item"."quantity" > 0 and "sale_line_item"."unit_price_kes" >= 0 and "sale_line_item"."line_total_kes" = "sale_line_item"."quantity" * "sale_line_item"."unit_price_kes");

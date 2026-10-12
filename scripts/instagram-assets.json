@@ -1,0 +1,32 @@
+[
+  {
+    "key": "hero",
+    "output": "hero.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Dd4KSc6jYve/",
+    "alt": "A Sonique barista preparing a hand-brewed coffee"
+  },
+  {
+    "key": "coffee",
+    "output": "coffee.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Dd4KSc6jYve/",
+    "alt": "Coffee being prepared at the Sonique bar"
+  },
+  {
+    "key": "affogato",
+    "output": "affogato.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Dd_cPn7Das6/",
+    "alt": "Sonique affogato with espresso and vanilla ice cream"
+  },
+  {
+    "key": "vibe",
+    "output": "vibe.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DdyfYuDDURh/",
+    "alt": "Friends enjoying the relaxed atmosphere at Sonique"
+  },
+  {
+    "key": "work",
+    "output": "montblanc.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/Ddt5-uxjUZt/",
+    "alt": "Orange zest over a Mont Blanc at Sonique"
+  }
+]
