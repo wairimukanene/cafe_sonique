@@ -16,5 +16,33 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      DATABASE_URL: postgresql://sonique:${POSTGRES_PASSWORD:-sonique_dev}@postgres:5432/cafe_sonique
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    volumes:
+      - sonique_media:/app/.data/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # One-off jobs: docker compose run --rm tools npm run db:migrate
+  tools:
+    build:
+      context: .
+      target: tools
+    profiles: ["tools"]
+    env_file: .env.local
+    environment:
+      DATABASE_URL: postgresql://sonique:${POSTGRES_PASSWORD:-sonique_dev}@postgres:5432/cafe_sonique
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   sonique_postgres:
+  sonique_media:

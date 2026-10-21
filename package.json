@@ -12,7 +12,7 @@
     "db:down": "docker compose down",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "db:seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
     "assets:import-instagram": "tsx scripts/import-instagram-assets.ts"
   },

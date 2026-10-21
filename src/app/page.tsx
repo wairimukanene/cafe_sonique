@@ -19,6 +19,8 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { connection } from "next/server";
+
 import { BookingForm } from "@/components/marketing/booking-form";
 import { BrandMark } from "@/components/marketing/brand-mark";
 import { SitePhoto } from "@/components/marketing/site-photo";
@@ -42,7 +44,11 @@ const navLinks = [
   { href: "#visit", label: "Visit" },
 ];
 
+// Content comes from the database at request time, so builds never need a database connection.
+export const instant = false;
+
 export default async function Home() {
+  await connection();
   const [menuGroups, upcomingEvents, thoughts, photos, text, videos] = await Promise.all([
     getPublicMenu(),
     getPublicEvents(),
