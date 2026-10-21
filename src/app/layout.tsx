@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Geist } from "next/font/google";
+import { Cormorant_Garamond, Fredoka, Geist } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 const cormorant = Cormorant_Garamond({
@@ -31,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${cormorant.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${cormorant.variable} ${fredoka.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

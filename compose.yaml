@@ -5,9 +5,9 @@ services:
     environment:
       POSTGRES_DB: cafe_sonique
       POSTGRES_USER: sonique
-      POSTGRES_PASSWORD: sonique_dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sonique_dev}
     ports:
-      - "54329:5432"
+      - "127.0.0.1:54329:5432"
     volumes:
       - sonique_postgres:/var/lib/postgresql/data
     healthcheck:

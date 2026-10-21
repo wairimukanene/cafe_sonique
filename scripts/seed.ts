@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, like, ne, notInArray, sql } from "drizzle-orm";
 
 import { auth } from "../src/lib/auth-core";
 import { db } from "../src/lib/db/client";
@@ -12,6 +12,7 @@ import {
   menuItem,
   user,
 } from "../src/lib/db/schema";
+import { photoSlots } from "../src/lib/media/slots";
 
 async function ensureStaff(
   name: string,
@@ -56,10 +57,19 @@ async function main() {
   await db
     .insert(menuCategory)
     .values([
-      { id: "cat-espresso", name: "Espresso bar", slug: "espresso-bar", sortOrder: 1 },
-      { id: "cat-specials", name: "Sonique specials", slug: "sonique-specials", sortOrder: 2 },
+      { id: "cat-espresso", name: "Coffee", slug: "coffee", sortOrder: 1 },
+      { id: "cat-tea", name: "Tea", slug: "tea", sortOrder: 2 },
+      { id: "cat-specials", name: "Pastries", slug: "pastries", sortOrder: 3 },
     ])
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: menuCategory.id,
+      set: {
+        name: sql`excluded.name`,
+        slug: sql`excluded.slug`,
+        sortOrder: sql`excluded.sort_order`,
+        updatedAt: new Date(),
+      },
+    });
 
   await db
     .insert(menuItem)
@@ -68,12 +78,29 @@ async function main() {
       { id: "item-flat-white", categoryId: "cat-espresso", name: "Flat white", description: "Double espresso, textured milk", priceKes: 380, sortOrder: 2 },
       { id: "item-cappuccino", categoryId: "cat-espresso", name: "Cappuccino", description: "Espresso, milk, generous foam", priceKes: 380, sortOrder: 3 },
       { id: "item-v60", categoryId: "cat-espresso", name: "V60 pour-over", description: "Ask what we’re brewing today", priceKes: 450, sortOrder: 4 },
-      { id: "item-mont-blanc", categoryId: "cat-specials", name: "Mont Blanc", description: "Iced coffee, citrus cream", priceKes: 530, sortOrder: 1 },
-      { id: "item-affogato", categoryId: "cat-specials", name: "Affogato", description: "Vanilla ice cream, espresso", priceKes: 480, sortOrder: 2 },
-      { id: "item-special-tea", categoryId: "cat-specials", name: "Special-tea", description: "Our rotating house tea", priceKes: 420, sortOrder: 3 },
-      { id: "item-cold-brew", categoryId: "cat-specials", name: "Cold brew", description: "Slow-steeped, bright and smooth", priceKes: 400, sortOrder: 4 },
+      { id: "item-mont-blanc", categoryId: "cat-espresso", name: "Mont Blanc", description: "Iced coffee, citrus cream", priceKes: 530, sortOrder: 5 },
+      { id: "item-affogato", categoryId: "cat-espresso", name: "Affogato", description: "Vanilla ice cream, espresso", priceKes: 480, sortOrder: 6 },
+      { id: "item-cold-brew", categoryId: "cat-espresso", name: "Cold brew", description: "Slow-steeped, bright and smooth", priceKes: 400, sortOrder: 7 },
+      { id: "item-special-tea", categoryId: "cat-tea", name: "Special-tea", description: "Our rotating house tea", priceKes: 420, sortOrder: 1 },
     ])
     .onConflictDoNothing();
+
+  await db
+    .update(menuItem)
+    .set({ categoryId: "cat-tea", updatedAt: new Date() })
+    .where(and(eq(menuItem.id, "item-special-tea"), eq(menuItem.categoryId, "cat-specials")));
+
+  const coffeeDrinks = [
+    { id: "item-mont-blanc", sortOrder: 5 },
+    { id: "item-affogato", sortOrder: 6 },
+    { id: "item-cold-brew", sortOrder: 7 },
+  ];
+  for (const drink of coffeeDrinks) {
+    await db
+      .update(menuItem)
+      .set({ categoryId: "cat-espresso", sortOrder: drink.sortOrder, updatedAt: new Date() })
+      .where(and(eq(menuItem.id, drink.id), eq(menuItem.categoryId, "cat-specials")));
+  }
 
   await db
     .insert(event)
@@ -88,16 +115,25 @@ async function main() {
     })
     .onConflictDoNothing();
 
+  for (const slot of photoSlots) {
+    await db
+      .delete(mediaAsset)
+      .where(
+        and(
+          eq(mediaAsset.key, slot.key),
+          like(mediaAsset.path, "/images/sonique/%"),
+          slot.defaultPath ? ne(mediaAsset.path, slot.defaultPath) : undefined,
+        ),
+      );
+  }
   await db
-    .insert(mediaAsset)
-    .values([
-      { id: "media-hero", key: "hero", path: "/images/sonique/hero.jpg", altText: "A Sonique barista preparing a hand-brewed coffee", sourcePermalink: "https://www.instagram.com/cafe_sonique/p/Dd4KSc6jYve/", approved: true },
-      { id: "media-coffee", key: "coffee", path: "/images/sonique/coffee.jpg", altText: "Coffee being prepared at the Sonique bar", sourcePermalink: "https://www.instagram.com/cafe_sonique/p/Dd4KSc6jYve/", approved: true },
-      { id: "media-affogato", key: "affogato", path: "/images/sonique/affogato.jpg", altText: "Sonique affogato with espresso and vanilla ice cream", sourcePermalink: "https://www.instagram.com/cafe_sonique/p/Dd_cPn7Das6/", approved: true },
-      { id: "media-vibe", key: "vibe", path: "/images/sonique/vibe.jpg", altText: "Friends enjoying the relaxed atmosphere at Sonique", sourcePermalink: "https://www.instagram.com/cafe_sonique/p/DdyfYuDDURh/", approved: true },
-      { id: "media-work", key: "work", path: "/images/sonique/montblanc.jpg", altText: "Orange zest over a Mont Blanc at Sonique", sourcePermalink: "https://www.instagram.com/cafe_sonique/p/Ddt5-uxjUZt/", approved: true },
-    ])
-    .onConflictDoNothing();
+    .delete(mediaAsset)
+    .where(
+      and(
+        notInArray(mediaAsset.key, photoSlots.map((slot) => slot.key)),
+        like(mediaAsset.path, "/images/sonique/%"),
+      ),
+    );
 
   await db
     .insert(cafeSetting)

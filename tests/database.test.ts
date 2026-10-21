@@ -73,6 +73,8 @@ afterAll(async () => {
   await database.delete(inventoryItem).where(eq(inventoryItem.id, "test-inventory-beans"));
   await database.delete(loyaltyEntry).where(eq(loyaltyEntry.customerId, "test-loyalty-customer"));
   await database.delete(customer).where(eq(customer.phoneE164, "+254700000001"));
+  await database.delete(customer).where(eq(customer.phoneE164, "+254700000002"));
+  await database.delete(customer).where(eq(customer.phoneE164, "+254700000003"));
   await database.delete(auditLog).where(eq(auditLog.entityId, "test-booking"));
   await database.delete(booking).where(eq(booking.id, "test-booking"));
   await database.delete(menuItem).where(eq(menuItem.id, "test-menu-item"));
@@ -146,6 +148,7 @@ describe("PostgreSQL operational integrity", () => {
       paymentMethod: "mpesa_buy_goods" as const,
       paymentAmountKes: 250,
       mpesaReceiptNumber: "VITEST26001",
+      customerPhone: "+254700000003",
     };
     const first = await completeSale(
       { ...base, idempotencyKey: "vitest-operations-primary" },
@@ -250,5 +253,48 @@ describe("PostgreSQL operational integrity", () => {
         ),
       }),
     ).toBeTruthy();
+  });
+
+  it("comps one drink on the sixth visit and still charges the rest of the order", async () => {
+    const { completeSale } = await import("../src/lib/operations/service");
+    const actor = await database.query.user.findFirst({
+      where: (users, { eq: equals }) =>
+        equals(users.email, "owner@cafesonique.local"),
+    });
+    expect(actor).toBeTruthy();
+
+    for (let visit = 1; visit <= 5; visit += 1) {
+      await completeSale(
+        {
+          idempotencyKey: `vitest-operations-loyalty-mixed-${visit}`,
+          items: [{ menuItemId: "item-espresso", quantity: 1 }],
+          paymentMethod: "cash",
+          paymentAmountKes: 250,
+          customerPhone: "+254700000002",
+        },
+        actor!.id,
+      );
+    }
+
+    const reward = await completeSale(
+      {
+        idempotencyKey: "vitest-operations-loyalty-mixed-6",
+        items: [
+          { menuItemId: "item-espresso", quantity: 2 },
+          { menuItemId: "item-flat-white", quantity: 1 },
+        ],
+        paymentMethod: "cash",
+        paymentAmountKes: 250 + 380,
+        customerPhone: "+254700000002",
+        loyaltyMenuItemId: "item-espresso",
+      },
+      actor!.id,
+    );
+
+    expect(reward.totalKes).toBe(630);
+    const saved = await database.query.customer.findFirst({
+      where: eq(customer.phoneE164, "+254700000002"),
+    });
+    expect(saved?.loyaltyBalance).toBe(0);
   });
 });

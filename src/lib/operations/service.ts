@@ -138,6 +138,10 @@ export async function completeSale(input: CompleteSaleInput, actorId: string) {
     }
     standardDiscountKes = Math.min(subtotalKes, standardDiscountKes);
 
+    if (!input.customerPhone) {
+      throw new OperationsError("A customer phone is required.");
+    }
+
     let customerId: string | null = null;
     let loyaltyDiscountKes = 0;
     let loyaltyBalance = 0;

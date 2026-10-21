@@ -13,7 +13,6 @@ type Props = {
   children: React.ReactNode;
   submitLabel: string;
   className?: string;
-  encType?: "multipart/form-data";
 };
 
 const initialState: OperationActionState = { ok: false, message: "" };
@@ -23,7 +22,6 @@ export function OperationForm({
   children,
   submitLabel,
   className = "",
-  encType,
 }: Props) {
   const [state, formAction, pending] = useActionState(
     async (_state: OperationActionState, formData: FormData) => action(formData),
@@ -34,7 +32,6 @@ export function OperationForm({
     <form
       action={formAction}
       className={`dashboard-form operations-form ${className}`}
-      encType={encType}
     >
       {children}
       {state.message ? (

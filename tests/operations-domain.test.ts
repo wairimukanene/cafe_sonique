@@ -25,6 +25,14 @@ describe("operations domain", () => {
     expect(valid.success).toBe(true);
     expect(
       completeSaleSchema.safeParse({
+        idempotencyKey: "sale-request-phone",
+        items: [{ menuItemId: "espresso", quantity: 1 }],
+        paymentMethod: "cash",
+        paymentAmountKes: 250,
+      }).success,
+    ).toBe(false);
+    expect(
+      completeSaleSchema.safeParse({
         idempotencyKey: "sale-request-2",
         items: [{ menuItemId: "espresso", quantity: 1 }],
         paymentMethod: "mpesa_buy_goods",

@@ -1,17 +1,115 @@
 import "server-only";
 
-import { and, asc, desc, eq, gte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, like } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { db } from "@/lib/db";
 import {
   auditLog,
   booking,
+  cafeSetting,
   event,
   guestThought,
+  mediaAsset,
   menuCategory,
   menuItem,
 } from "@/lib/db/schema";
+import {
+  photoSlots,
+  videoSlotKeys,
+  videoSlots,
+  type PhotoSlotKey,
+  type VideoSlotKey,
+} from "@/lib/media/slots";
+import { SITE_TEXT_PREFIX, siteTextDefaults, type SiteText } from "@/lib/site-text";
+
+export type SitePhoto = { path: string | null; altText: string; updatedAt: Date | null };
+
+async function loadSiteText() {
+  const rows = await db
+    .select({ key: cafeSetting.key, value: cafeSetting.value })
+    .from(cafeSetting)
+    .where(like(cafeSetting.key, `${SITE_TEXT_PREFIX}%`));
+  const text = siteTextDefaults();
+  for (const row of rows) {
+    const key = row.key.slice(SITE_TEXT_PREFIX.length);
+    if (key in text && typeof row.value === "string") {
+      text[key as keyof SiteText] = row.value;
+    }
+  }
+  return text;
+}
+
+export async function getPublicSiteText() {
+  "use cache";
+  cacheTag("public-site-text");
+  cacheLife("hours");
+
+  return loadSiteText();
+}
+
+export async function getStaffSiteText() {
+  return loadSiteText();
+}
+
+async function loadSitePhotos(approvedOnly: boolean) {
+  const rows = await db.query.mediaAsset.findMany(
+    approvedOnly ? { where: eq(mediaAsset.approved, true) } : undefined,
+  );
+  const byKey = new Map(rows.map((row) => [row.key, row]));
+
+  return Object.fromEntries(
+    photoSlots.map((slot) => {
+      const row = byKey.get(slot.key);
+      return [
+        slot.key,
+        row
+          ? { path: row.path, altText: row.altText, updatedAt: row.updatedAt }
+          : { path: slot.defaultPath, altText: slot.defaultAlt, updatedAt: null },
+      ];
+    }),
+  ) as Record<PhotoSlotKey, SitePhoto>;
+}
+
+export type SiteVideo = { path: string | null; title: string };
+
+async function loadSiteVideos() {
+  const rows = await db.query.mediaAsset.findMany({
+    where: inArray(mediaAsset.key, [...videoSlotKeys]),
+  });
+  const byKey = new Map(rows.map((row) => [row.key, row]));
+
+  return Object.fromEntries(
+    videoSlots.map((slot) => {
+      const row = byKey.get(slot.key);
+      return [slot.key, { path: row?.path ?? null, title: row?.altText ?? slot.defaultTitle }];
+    }),
+  ) as Record<VideoSlotKey, SiteVideo>;
+}
+
+export async function getPublicVideos() {
+  "use cache";
+  cacheTag("public-media");
+  cacheLife("hours");
+
+  return loadSiteVideos();
+}
+
+export async function getStaffVideos() {
+  return loadSiteVideos();
+}
+
+export async function getPublicPhotos() {
+  "use cache";
+  cacheTag("public-media");
+  cacheLife("hours");
+
+  return loadSitePhotos(true);
+}
+
+export async function getStaffPhotos() {
+  return loadSitePhotos(false);
+}
 
 export async function getPublicMenu() {
   "use cache";

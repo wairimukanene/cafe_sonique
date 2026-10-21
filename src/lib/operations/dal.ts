@@ -26,11 +26,12 @@ import {
   DEFAULT_LOYALTY_CAP_KES,
   DEFAULT_LOYALTY_VISITS,
   NAIROBI_TIME_ZONE,
+  normalizeKenyanPhone,
 } from "@/lib/operations/domain";
 
 export async function getSalesWorkspace() {
   await requireStaff();
-  const [menu, recentSales, loyaltyCustomers] = await Promise.all([
+  const [menu, recentSales, loyaltyCustomers, loyaltySettings] = await Promise.all([
     db.query.menuCategory.findMany({
       where: eq(menuCategory.active, true),
       orderBy: [asc(menuCategory.sortOrder), asc(menuCategory.name)],
@@ -57,13 +58,26 @@ export async function getSalesWorkspace() {
       .from(customer)
       .orderBy(desc(customer.updatedAt))
       .limit(100),
+    db
+      .select()
+      .from(cafeSetting)
+      .where(sql`${cafeSetting.key} like 'operations.loyalty%'`),
   ]);
+  const settings = new Map(loyaltySettings.map((row) => [row.key, row.value]));
   return {
     menu,
     items: menu.flatMap((category) => category.items),
     recentSales,
     sales: recentSales,
     loyaltyCustomers,
+    loyalty: {
+      visitsRequired: Number(
+        settings.get("operations.loyalty_visits_required") ?? DEFAULT_LOYALTY_VISITS,
+      ),
+      rewardCapKes: Number(
+        settings.get("operations.loyalty_reward_cap_kes") ?? DEFAULT_LOYALTY_CAP_KES,
+      ),
+    },
   };
 }
 
@@ -397,25 +411,66 @@ export async function getReportsData(options: ReportOptions = {}) {
 
 export async function getLoyaltyWorkspace(phone?: string) {
   await requireStaff();
-  if (!phone) return { customer: null, customers: [], entries: [] };
-  const normalizedPhone = phone.replace(/[\s()-]/g, "").replace(/^0/, "+254");
-  const matchedCustomer = await db.query.customer.findFirst({
-    where: eq(customer.phoneE164, normalizedPhone),
-  });
-  if (!matchedCustomer) return { customer: null, customers: [], entries: [] };
-  const entries = await db
-    .select()
-    .from(loyaltyEntry)
-    .where(eq(loyaltyEntry.customerId, matchedCustomer.id))
-    .orderBy(desc(loyaltyEntry.createdAt))
-    .limit(100);
-  const displayCustomer = {
-    ...matchedCustomer,
-    phone: matchedCustomer.phoneE164,
-    name: matchedCustomer.displayName,
-    points: matchedCustomer.loyaltyBalance,
+  const [settingRows, customers] = await Promise.all([
+    db
+      .select()
+      .from(cafeSetting)
+      .where(sql`${cafeSetting.key} like 'operations.loyalty%'`),
+    db
+      .select({
+        id: customer.id,
+        phoneE164: customer.phoneE164,
+        displayName: customer.displayName,
+        loyaltyBalance: customer.loyaltyBalance,
+        phone: customer.phoneE164,
+        name: customer.displayName,
+        points: customer.loyaltyBalance,
+      })
+      .from(customer)
+      .orderBy(desc(customer.loyaltyBalance), desc(customer.updatedAt))
+      .limit(100),
+  ]);
+  const settings = new Map(settingRows.map((row) => [row.key, row.value]));
+  const visitsRequired = Number(
+    settings.get("operations.loyalty_visits_required") ?? DEFAULT_LOYALTY_VISITS,
+  );
+  const rewardCapKes = Number(
+    settings.get("operations.loyalty_reward_cap_kes") ?? DEFAULT_LOYALTY_CAP_KES,
+  );
+  const normalizedPhone =
+    typeof phone === "string" && phone.trim()
+      ? String(normalizeKenyanPhone(phone))
+      : "";
+  const matchedCustomer = normalizedPhone
+    ? customers.find((row) => row.phoneE164 === normalizedPhone) ??
+      (await db.query.customer.findFirst({
+        where: eq(customer.phoneE164, normalizedPhone),
+      }))
+    : null;
+  const entries = matchedCustomer
+    ? await db
+        .select()
+        .from(loyaltyEntry)
+        .where(eq(loyaltyEntry.customerId, matchedCustomer.id))
+        .orderBy(desc(loyaltyEntry.createdAt))
+        .limit(100)
+    : [];
+  const displayCustomer = matchedCustomer
+    ? {
+        ...matchedCustomer,
+        phone: matchedCustomer.phoneE164,
+        name: matchedCustomer.displayName,
+        points: matchedCustomer.loyaltyBalance,
+      }
+    : null;
+  return {
+    customer: displayCustomer,
+    customers,
+    entries,
+    searched: Boolean(normalizedPhone),
+    visitsRequired,
+    rewardCapKes,
   };
-  return { customer: displayCustomer, customers: [displayCustomer], entries };
 }
 
 export async function getInventoryWorkspace() {

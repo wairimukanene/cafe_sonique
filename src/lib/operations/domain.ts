@@ -48,7 +48,7 @@ export const completeSaleSchema = z
       .regex(/^[A-Z0-9]{5,20}$/)
       .optional(),
     paymentNote: optionalText,
-    customerPhone: kenyanPhoneSchema.optional(),
+    customerPhone: kenyanPhoneSchema,
     customerName: z.string().trim().min(1).max(120).optional(),
     loyaltyMenuItemId: z.string().min(1).max(200).optional(),
   })
@@ -79,13 +79,6 @@ export const completeSaleSchema = z
         code: "custom",
         path: ["mpesaReceiptNumber"],
         message: "The M-Pesa receipt number is required.",
-      });
-    }
-    if (value.loyaltyMenuItemId && !value.customerPhone) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["customerPhone"],
-        message: "A customer phone is required for loyalty redemption.",
       });
     }
   });

@@ -2,21 +2,65 @@
   padding-top: 2rem;
 }
 
+.loyalty-progress {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.loyalty-progress p {
+  color: rgb(50 54 44 / 62%);
+  font-size: 0.78rem;
+}
+
+.loyalty-progress-track {
+  overflow: hidden;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--sage);
+}
+
+.loyalty-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--olive);
+}
+
+.loyalty-progress-track.is-ready .loyalty-progress-fill {
+  background: var(--rust);
+}
+
+.loyalty-customer {
+  display: grid;
+  gap: 0.35rem;
+  border-bottom: 1px solid rgb(50 54 44 / 10%);
+  padding-bottom: 0.9rem;
+}
+
+.loyalty-customer .loyalty-progress {
+  margin: 0.35rem 0 0;
+}
+
+.loyalty-customer .loyalty-progress-track {
+  height: 0.45rem;
+}
+
 .operations-nav {
   display: flex;
   gap: 0.4rem;
   overflow-x: auto;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgb(27 33 25 / 12%);
-  background: rgb(243 239 228 / 88%);
+  border-bottom: 1px solid rgb(50 54 44 / 12%);
+  background: rgb(249 249 243 / 88%);
   scrollbar-width: thin;
 }
 
 .operations-nav a {
   flex: 0 0 auto;
   padding: 0.6rem 0.8rem;
-  border: 1px solid rgb(27 33 25 / 14%);
-  color: rgb(27 33 25 / 70%);
+  border: 1px solid rgb(50 54 44 / 14%);
+  color: rgb(50 54 44 / 70%);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -32,14 +76,14 @@
   display: grid;
   gap: 0.75rem;
   min-height: 9rem;
-  border: 1px solid rgb(27 33 25 / 12%);
+  border: 1px solid rgb(50 54 44 / 12%);
   background: var(--cream);
   padding: 1.25rem;
 }
 
 .operations-card p,
 .operations-muted {
-  color: rgb(27 33 25 / 58%);
+  color: rgb(50 54 44 / 58%);
   font-size: 0.82rem;
   line-height: 1.55;
 }
@@ -60,12 +104,51 @@
   gap: 0.5rem;
 }
 
+.phone-field {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgb(50 54 44 / 18%);
+  background: white;
+}
+
+.phone-field:focus-within {
+  border-color: var(--olive);
+  box-shadow: 0 0 0 3px rgb(104 112 72 / 16%);
+}
+
+.phone-code {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  border-right: 1px solid rgb(50 54 44 / 18%);
+  background: rgb(50 54 44 / 5%);
+  padding: 0.85rem 0.75rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.dashboard-form .phone-field input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dashboard-form .phone-field input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
 .operations-fieldset {
   display: grid;
   gap: 1rem;
   min-width: 0;
   margin: 0;
-  border: 1px solid rgb(27 33 25 / 12%);
+  border: 1px solid rgb(50 54 44 / 12%);
   padding: 1rem;
 }
 
@@ -78,7 +161,7 @@
 
 .operations-empty {
   padding: 1.5rem;
-  color: rgb(27 33 25 / 50%);
+  color: rgb(50 54 44 / 50%);
   font-size: 0.85rem;
   text-align: center;
 }
@@ -97,7 +180,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid rgb(27 33 25 / 10%);
+  border-bottom: 1px solid rgb(50 54 44 / 10%);
   padding-block: 0.7rem;
 }
 
@@ -107,7 +190,7 @@
 }
 
 .pos-menu-item span {
-  color: rgb(27 33 25 / 52%);
+  color: rgb(50 54 44 / 52%);
   font-size: 0.75rem;
 }
 
@@ -122,7 +205,7 @@
   display: grid;
   aspect-ratio: 1;
   place-items: center;
-  border: 1px solid rgb(27 33 25 / 20%);
+  border: 1px solid rgb(50 54 44 / 20%);
   background: transparent;
   cursor: pointer;
 }
@@ -147,13 +230,13 @@
 }
 
 .pos-total span {
-  color: rgb(243 239 228 / 55%);
+  color: rgb(249 249 243 / 55%);
   font-size: 0.75rem;
 }
 
 .pos-total-due {
   margin-top: 0.5rem;
-  border-top: 1px solid rgb(243 239 228 / 18%);
+  border-top: 1px solid rgb(249 249 243 / 18%);
   padding-top: 0.85rem;
   font-size: 1.15rem;
 }
@@ -165,7 +248,7 @@
 }
 
 .period-filters a {
-  border: 1px solid rgb(27 33 25 / 18%);
+  border: 1px solid rgb(50 54 44 / 18%);
   padding: 0.65rem 0.8rem;
   font-size: 0.72rem;
   font-weight: 700;

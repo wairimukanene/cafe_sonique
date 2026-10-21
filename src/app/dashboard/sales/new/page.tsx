@@ -33,7 +33,11 @@ export default async function NewSalePage() {
         </div>
       </header>
       <section className="dashboard-panel">
-        <PosForm items={items} />
+        <PosForm
+          items={items}
+          rewardCapKes={workspace.loyalty.rewardCapKes}
+          visitsRequired={workspace.loyalty.visitsRequired}
+        />
       </section>
     </main>
   );

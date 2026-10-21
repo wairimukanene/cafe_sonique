@@ -649,7 +649,32 @@ export const expenseRelations = relations(expense, ({ one, many }) => ({
   receipts: many(expenseReceipt),
 }));
 
+export const expenseReceiptRelations = relations(expenseReceipt, ({ one }) => ({
+  expense: one(expense, {
+    fields: [expenseReceipt.expenseId],
+    references: [expense.id],
+  }),
+}));
+
 export const inventoryItemRelations = relations(inventoryItem, ({ many }) => ({
   movements: many(inventoryMovement),
   recipes: many(recipeLine),
+}));
+
+export const inventoryMovementRelations = relations(inventoryMovement, ({ one }) => ({
+  inventoryItem: one(inventoryItem, {
+    fields: [inventoryMovement.inventoryItemId],
+    references: [inventoryItem.id],
+  }),
+}));
+
+export const recipeLineRelations = relations(recipeLine, ({ one }) => ({
+  inventoryItem: one(inventoryItem, {
+    fields: [recipeLine.inventoryItemId],
+    references: [inventoryItem.id],
+  }),
+  menuItem: one(menuItem, {
+    fields: [recipeLine.menuItemId],
+    references: [menuItem.id],
+  }),
 }));

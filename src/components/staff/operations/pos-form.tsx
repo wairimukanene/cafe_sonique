@@ -13,6 +13,13 @@ export type PosItem = {
   available?: boolean;
 };
 
+function nationalPhoneDigits(value: string) {
+  let digits = value.replace(/\D/g, "");
+  if (digits.startsWith("254")) digits = digits.slice(3);
+  if (digits.startsWith("0")) digits = digits.slice(1);
+  return digits.slice(0, 9);
+}
+
 export type LoyaltyOption = {
   id: string;
   label: string;
@@ -21,9 +28,13 @@ export type LoyaltyOption = {
 
 export function PosForm({
   items,
+  visitsRequired = 5,
+  rewardCapKes = 530,
 }: {
   items: PosItem[];
   loyaltyOptions?: LoyaltyOption[];
+  visitsRequired?: number;
+  rewardCapKes?: number;
 }) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [discountType, setDiscountType] = useState<"fixed_kes" | "percent">(
@@ -33,6 +44,8 @@ export function PosForm({
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "mpesa_buy_goods">(
     "cash",
   );
+  const [loyaltyItemId, setLoyaltyItemId] = useState("");
+  const [nationalPhone, setNationalPhone] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState("");
 
   useEffect(() => {
@@ -52,7 +65,12 @@ export function PosForm({
     discountType === "percent"
       ? Math.min(subtotal, subtotal * (Math.min(discount, 100) / 100))
       : Math.min(subtotal, discount);
-  const total = Math.max(0, subtotal - discountKes);
+  const loyaltyChoices = items.filter((item) => (quantities[item.id] ?? 0) > 0);
+  const loyaltyDrink = loyaltyChoices.find((item) => item.id === loyaltyItemId);
+  const loyaltyDiscountKes = loyaltyDrink
+    ? Math.min(loyaltyDrink.priceKes, rewardCapKes, Math.max(0, subtotal - discountKes))
+    : 0;
+  const total = Math.max(0, subtotal - discountKes - loyaltyDiscountKes);
   const lineItems = items
     .filter((item) => (quantities[item.id] ?? 0) > 0)
     .map((item) => ({ menuItemId: item.id, quantity: quantities[item.id] }));
@@ -152,14 +170,27 @@ export function PosForm({
             </select>
           </label>
           <label>
-            Kenya phone (optional)
+            Kenya phone
+            <span className="phone-field">
+              <span className="phone-code">+254</span>
+              <input
+                autoComplete="tel-national"
+                inputMode="numeric"
+                onChange={(event) =>
+                  setNationalPhone(nationalPhoneDigits(event.target.value))
+                }
+                pattern="[17][0-9]{8}"
+                placeholder="712345678"
+                required
+                title="Enter the 9 digits after +254, for example 712345678."
+                type="tel"
+                value={nationalPhone}
+              />
+            </span>
             <input
-              autoComplete="tel"
-              inputMode="tel"
               name="customerPhone"
-              pattern="\+254[17]\d{8}"
-              placeholder="+254712345678"
-              type="tel"
+              type="hidden"
+              value={nationalPhone ? `+254${nationalPhone}` : ""}
             />
           </label>
         </div>
@@ -178,13 +209,18 @@ export function PosForm({
 
       <fieldset className="operations-fieldset">
         <legend>3. Loyalty (optional)</legend>
+        <p className="operations-muted">
+          After {visitsRequired} paid visits, the next drink is free. Only that one drink comes off the bill. Anything else on the order is still paid, and the free visit does not earn another stamp.
+        </p>
         <label>
           Free drink to redeem
-          <select name="loyaltyMenuItemId" defaultValue="">
+          <select
+            name="loyaltyMenuItemId"
+            value={loyaltyDrink?.id ?? ""}
+            onChange={(event) => setLoyaltyItemId(event.target.value)}
+          >
             <option value="">No redemption</option>
-            {items
-              .filter((item) => (quantities[item.id] ?? 0) > 0)
-              .map((item) => (
+            {loyaltyChoices.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name} · KES {item.priceKes.toLocaleString("en-KE")}
               </option>
@@ -197,6 +233,7 @@ export function PosForm({
         <ShoppingBag aria-hidden size={22} />
         <div><span>Subtotal</span><strong>KES {subtotal.toLocaleString("en-KE")}</strong></div>
         <div><span>Discount</span><strong>− KES {discountKes.toLocaleString("en-KE")}</strong></div>
+        <div><span>Free drink</span><strong>− KES {loyaltyDiscountKes.toLocaleString("en-KE")}</strong></div>
         <div className="pos-total-due"><span>Total due</span><strong>KES {total.toLocaleString("en-KE")}</strong></div>
       </aside>
     </OperationForm>

@@ -74,6 +74,7 @@ export async function saveMenuItem(
   revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/menu");
+  revalidatePath("/admin/menu");
   return { ok: true, message: "Menu item saved." };
 }
 
@@ -127,6 +128,7 @@ export async function saveEvent(
   revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/events");
+  revalidatePath("/admin/events");
   return { ok: true, message: "Event saved." };
 }
 
@@ -165,6 +167,7 @@ export async function updateBookingStatus(
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/bookings");
+  revalidatePath("/admin/bookings");
   return { ok: true, message: "Booking updated." };
 }
 
@@ -206,5 +209,6 @@ export async function updateThoughtVisibility(
   updateTag("public-thoughts");
   revalidatePath("/");
   revalidatePath("/dashboard/thoughts");
+  revalidatePath("/admin/thoughts");
   return { ok: true, message: "Thought visibility updated." };
 }

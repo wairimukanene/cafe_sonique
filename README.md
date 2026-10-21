@@ -80,6 +80,18 @@ production. For ongoing imports, use the official Instagram Graph API and
 immediately copy returned media into controlled storage; do not use runtime
 scraping or CDN hotlinks.
 
+## Website editor
+
+Open `/admin` to edit the public site: homepage photos, menu, events,
+booking enquiries and guest thoughts. Photos are resized in the browser
+before upload and appear on the homepage as soon as they are published.
+
+Uploaded photos are stored in `.data/media` and served from `/media/…`.
+That folder must persist between deployments; on hosting without a
+persistent disk, replace `src/lib/media/storage.ts` with an S3-compatible
+bucket (for example Cloudflare R2) and add its domain to
+`images.remotePatterns`.
+
 ## Roles and security
 
 - `barista`: records sales, expenses, loyalty visits and stock movements, and

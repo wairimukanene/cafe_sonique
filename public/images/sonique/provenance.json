@@ -43,5 +43,77 @@
     "width": 3072,
     "height": 4096,
     "importedAt": "2026-10-10T07:44:00.000Z"
+  },
+  {
+    "key": "dj-decks",
+    "path": "/images/sonique/dj-decks.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DemH_bejQvO/",
+    "alt": "A DJ in headphones on the decks at Sonique",
+    "width": 1918,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "cd-listening",
+    "path": "/images/sonique/cd-listening.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DemH_bejQvO/",
+    "alt": "A guest in headphones choosing a track on the Sonique CD player",
+    "width": 1918,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "tea-pot",
+    "path": "/images/sonique/tea-pot.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DemH_bejQvO/",
+    "alt": "A pot of Sonique house tea beside the decks",
+    "width": 1919,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "pastries",
+    "path": "/images/sonique/pastries.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DeqzY4PjdSa/",
+    "alt": "Pastries and coffee beside a CD player at Sonique",
+    "width": 1500,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "bar-room",
+    "path": "/images/sonique/bar-room.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DeV9A1RjeV2/",
+    "alt": "A guest ordering at the Sonique bar",
+    "width": 1504,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "paintings",
+    "path": "/images/sonique/paintings.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DeV9A1RjeV2/",
+    "alt": "Paintings, plants and a quiet corner inside Sonique",
+    "width": 1504,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "espresso-machine",
+    "path": "/images/sonique/espresso-machine.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DeqzY4PjdSa/",
+    "alt": "The orange espresso machine and grinder at Sonique",
+    "width": 1500,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
+  },
+  {
+    "key": "bar-sign",
+    "path": "/images/sonique/bar-sign.jpg",
+    "permalink": "https://www.instagram.com/cafe_sonique/p/DeV9A1RjeV2/",
+    "alt": "The Sonique bar, with the espresso machine and pastry counter",
+    "width": 1504,
+    "height": 2000,
+    "importedAt": "2026-10-21T05:50:00.000Z"
   }
 ]

@@ -20,7 +20,7 @@ export function LoginForm() {
     const result = await authClient.signIn.email({
       email: String(form.get("email")),
       password: String(form.get("password")),
-      callbackURL: "/dashboard",
+      callbackURL: "/admin",
     });
 
     setPending(false);
@@ -30,7 +30,7 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/admin");
     router.refresh();
   }
 

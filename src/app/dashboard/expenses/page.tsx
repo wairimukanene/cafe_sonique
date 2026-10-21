@@ -39,7 +39,6 @@ export default async function ExpensesPage() {
         <OperationForm
           action={recordExpenseAction}
           className="mt-6"
-          encType="multipart/form-data"
           submitLabel="Record expense"
         >
           <div className="dashboard-form-grid">

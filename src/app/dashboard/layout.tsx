@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { DashboardNav } from "@/components/staff/dashboard-nav";
 import { LogoutButton } from "@/components/staff/logout-button";
+import { BrandMark } from "@/components/marketing/brand-mark";
 import { requireStaff } from "@/lib/auth/session";
 import { DashboardLoading } from "./loading";
 
@@ -17,7 +18,9 @@ export default async function DashboardLayout({
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
         <div>
-          <Link className="brand-mark text-cream" href="/">SON<span>ː</span>QUE</Link>
+          <Link href="/" aria-label="Sonique home">
+            <BrandMark />
+          </Link>
           <p className="mt-2 text-xs uppercase tracking-[0.16em] text-cream/40">Staff workspace</p>
         </div>
         <DashboardNav isOwner={session.user.role === "owner"} />
