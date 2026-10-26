@@ -11,14 +11,14 @@ export type SiteTextField = {
 export const siteTextFields = [
   {
     key: "story.heading",
-    section: "Meet the founder",
+    section: "The story behind Sonique",
     label: "Heading",
     defaultValue: "A room built for listening.",
     maxLength: 80,
   },
   {
     key: "story.body",
-    section: "Meet the founder",
+    section: "The story behind Sonique",
     label: "The story",
     hint: "Leave a blank line between paragraphs.",
     defaultValue:
@@ -28,7 +28,7 @@ export const siteTextFields = [
   },
   {
     key: "story.signoff",
-    section: "Meet the founder",
+    section: "The story behind Sonique",
     label: "Founder’s name",
     hint: "Shown under the story. Leave empty to hide.",
     defaultValue: "",
@@ -86,7 +86,7 @@ export const siteTextFields = [
     section: "Meet the barista",
     label: "Name",
     hint: "Leave empty to show “Meet the barista” only.",
-    defaultValue: "",
+    defaultValue: "Ronnie",
     maxLength: 60,
   },
   {

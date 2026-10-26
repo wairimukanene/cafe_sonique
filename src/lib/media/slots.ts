@@ -6,6 +6,8 @@ export const photoSlotKeys = [
   "space-1",
   "space-2",
   "space-3",
+  "space-4",
+  "space-5",
   "espresso",
   "tea",
   "pastries",
@@ -37,7 +39,7 @@ export const photoSlots: PhotoSlot[] = [
   },
   {
     key: "story",
-    section: "Meet the founder",
+    section: "The story behind Sonique",
     label: "Founder video cover",
     placement: "Shown before the founder video plays, or on its own if there is no video yet.",
     defaultPath: "/images/sonique/bar-sign.jpg",
@@ -68,12 +70,28 @@ export const photoSlots: PhotoSlot[] = [
     defaultAlt: "The orange espresso machine and grinder at Sonique",
   },
   {
+    key: "space-4",
+    section: "The space",
+    label: "The space 4",
+    placement: "Row of photos of the room, paintings and details.",
+    defaultPath: "/images/sonique/wall-laptop.jpg",
+    defaultAlt: "A guest working on a laptop beneath a framed print at Sonique",
+  },
+  {
+    key: "space-5",
+    section: "The space",
+    label: "The space 5",
+    placement: "Row of photos of the room, paintings and details.",
+    defaultPath: "/images/sonique/bar-conversation.jpg",
+    defaultAlt: "Two guests talking by the paintings, with the orange espresso machine behind them",
+  },
+  {
     key: "espresso",
     section: "Menu",
     label: "Coffee",
     placement: "Top of the Coffee menu.",
-    defaultPath: "/images/sonique/coffee.jpg",
-    defaultAlt: "A Sonique barista pouring a V60 pour-over",
+    defaultPath: "/images/sonique/coffee-iced-pour.jpg",
+    defaultAlt: "Cold coffee poured over ice into a Sonique glass",
   },
   {
     key: "tea",
@@ -104,8 +122,8 @@ export const photoSlots: PhotoSlot[] = [
     section: "In the Mix",
     label: "On the player",
     placement: "Second card in “In the Mix” – the CD player.",
-    defaultPath: "/images/sonique/cd-listening.jpg",
-    defaultAlt: "A guest in headphones choosing a track on the Sonique CD player",
+    defaultPath: "/images/sonique/cd-player.jpg",
+    defaultAlt: "A guest in headphones reading a CD sleeve beside the Sonique CD player",
   },
   {
     key: "mix-bar",
@@ -120,8 +138,8 @@ export const photoSlots: PhotoSlot[] = [
     section: "Meet the barista",
     label: "Barista video cover",
     placement: "Shown before the barista video plays, or on its own if there is no video yet.",
-    defaultPath: "/images/sonique/hero.jpg",
-    defaultAlt: "A Sonique barista smiling behind the bar",
+    defaultPath: "/images/sonique/barista.jpg",
+    defaultAlt: "A smiling Sonique barista holding a pour-over kettle behind the bar",
   },
 ];
 
@@ -140,15 +158,17 @@ export type VideoSlot = {
   label: string;
   placement: string;
   coverSlot: PhotoSlotKey;
+  defaultPath: string | null;
   defaultTitle: string;
 };
 
 export const videoSlots: VideoSlot[] = [
   {
     key: "owner-video",
-    label: "Meet the founder",
-    placement: "The founder telling the Sonique story, beside “Meet the founder”.",
+    label: "The story behind Sonique",
+    placement: "The founder telling the Sonique story, beside “The story behind Sonique”.",
     coverSlot: "story",
+    defaultPath: "/videos/founder-story.mp4",
     defaultTitle: "The founder of Sonique tells the story of the café",
   },
   {
@@ -156,6 +176,7 @@ export const videoSlots: VideoSlot[] = [
     label: "Meet the barista",
     placement: "The barista video in the “Meet the barista” section.",
     coverSlot: "barista",
+    defaultPath: null,
     defaultTitle: "Meet the Sonique barista",
   },
 ];

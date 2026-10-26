@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Fredoka, Geist } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +19,10 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
 });
+
+export const viewport: Viewport = {
+  colorScheme: "only light",
+};
 
 export const metadata: Metadata = {
   title: "Sonique — Music & Caffeine Society",

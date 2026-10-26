@@ -166,7 +166,7 @@ export async function saveSiteVideo(
   }
 
   const existing = await db.query.mediaAsset.findFirst({ where: eq(mediaAsset.key, slot.key) });
-  const path = newPath ?? existing?.path;
+  const path = newPath ?? existing?.path ?? slot.defaultPath;
   if (!path) return { ok: false, message: "Choose a video first." };
 
   await db.transaction(async (tx) => {
@@ -236,7 +236,10 @@ export async function removeSiteVideo(
   updateTag("public-media");
   revalidatePath("/");
   revalidatePath("/admin/videos");
-  return { ok: true, message: "Video removed. The cover photo shows instead." };
+  return {
+    ok: true,
+    message: slot.defaultPath ? "Back to the original video." : "Video removed. The cover photo shows instead.",
+  };
 }
 
 export async function saveSiteText(

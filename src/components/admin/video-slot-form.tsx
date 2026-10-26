@@ -11,6 +11,7 @@ type Props = {
   slot: Pick<VideoSlot, "key" | "label" | "placement">;
   current: { path: string | null; title: string };
   coverPath: string | null;
+  removeLabel: string | null;
 };
 
 const acceptedTypes = ["video/mp4", "video/quicktime", "video/webm"];
@@ -41,7 +42,7 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function VideoSlotForm({ slot, current, coverPath }: Props) {
+export function VideoSlotForm({ slot, current, coverPath, removeLabel }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
@@ -175,9 +176,9 @@ export function VideoSlotForm({ slot, current, coverPath }: Props) {
                 ? "Upload and publish"
                 : "Save description"}
         </button>
-        {current.path && !file ? (
+        {removeLabel && !file ? (
           <button className="staff-secondary-button" disabled={busy} onClick={handleRemove} type="button">
-            <Trash2 size={17} /> Remove video
+            <Trash2 size={17} /> {removeLabel}
           </button>
         ) : null}
       </form>

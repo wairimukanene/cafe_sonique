@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: only light;
   --cream: #f9f9f3;
   --ink: #32362c;
   --olive: #687048;
@@ -387,6 +388,11 @@ select {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .space-item-lead {
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+
   .thought-strip {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     gap: 4rem;
@@ -396,11 +402,6 @@ select {
 @media (min-width: 1024px) {
   .space-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .space-item-lead {
-    grid-row: span 2;
-    aspect-ratio: auto;
   }
 }
 

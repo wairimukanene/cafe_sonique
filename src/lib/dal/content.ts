@@ -71,7 +71,7 @@ async function loadSitePhotos(approvedOnly: boolean) {
   ) as Record<PhotoSlotKey, SitePhoto>;
 }
 
-export type SiteVideo = { path: string | null; title: string };
+export type SiteVideo = { path: string | null; title: string; updatedAt: Date | null };
 
 async function loadSiteVideos() {
   const rows = await db.query.mediaAsset.findMany({
@@ -82,7 +82,12 @@ async function loadSiteVideos() {
   return Object.fromEntries(
     videoSlots.map((slot) => {
       const row = byKey.get(slot.key);
-      return [slot.key, { path: row?.path ?? null, title: row?.altText ?? slot.defaultTitle }];
+      return [
+        slot.key,
+        row
+          ? { path: row.path, title: row.altText, updatedAt: row.updatedAt }
+          : { path: slot.defaultPath, title: slot.defaultTitle, updatedAt: null },
+      ];
     }),
   ) as Record<VideoSlotKey, SiteVideo>;
 }

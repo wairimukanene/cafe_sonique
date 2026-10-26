@@ -20,14 +20,21 @@ export default async function VideosPage() {
         photo, which you can change on the Photos page.
       </p>
       <div className="grid gap-4">
-        {videoSlots.map((slot) => (
-          <VideoSlotForm
-            key={slot.key}
-            slot={{ key: slot.key, label: slot.label, placement: slot.placement }}
-            current={videos[slot.key]}
-            coverPath={photos[slot.coverSlot].path}
-          />
-        ))}
+        {videoSlots.map((slot) => {
+          const video = videos[slot.key];
+          const customised = video.updatedAt !== null && video.path !== slot.defaultPath;
+          return (
+            <VideoSlotForm
+              key={slot.key}
+              slot={{ key: slot.key, label: slot.label, placement: slot.placement }}
+              current={video}
+              coverPath={photos[slot.coverSlot].path}
+              removeLabel={
+                customised ? (slot.defaultPath ? "Go back to the original video" : "Remove video") : null
+              }
+            />
+          );
+        })}
       </div>
     </main>
   );

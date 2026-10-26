@@ -59,7 +59,7 @@ export default async function Home() {
   ]);
 
   const featuredMenus = [
-    { slug: "coffee", photo: photos.espresso, intro: text["menu.espresso"], icon: Coffee, focus: "object-[center_30%]" },
+    { slug: "coffee", photo: photos.espresso, intro: text["menu.espresso"], icon: Coffee, focus: "object-[center_65%]" },
     { slug: "tea", photo: photos.tea, intro: text["menu.tea"], icon: Leaf, focus: "object-[center_40%]" },
     { slug: "pastries", photo: photos.pastries, intro: text["menu.pastries"], icon: Croissant, focus: "object-center" },
   ].flatMap((feature) => {
@@ -69,7 +69,13 @@ export default async function Home() {
   const otherMenus = menuGroups.filter(
     (category) => !featuredMenus.some((feature) => feature.group.id === category.id),
   );
-  const spacePhotos = [photos["space-1"], photos["space-2"], photos["space-3"]];
+  const spacePhotos = [
+    photos["space-1"],
+    photos["space-2"],
+    photos["space-3"],
+    photos["space-4"],
+    photos["space-5"],
+  ];
   const mixCards = [
     { label: "On the decks", caption: text["mix.decks"], photo: photos["mix-decks"], icon: Headphones },
     { label: "On the player", caption: text["mix.player"], photo: photos["mix-player"], icon: Disc3 },
@@ -146,7 +152,7 @@ export default async function Home() {
               placeholderIcon={UserRound}
             />
             <div className="lg:pt-10">
-              <p className="eyebrow text-olive">Meet the founder</p>
+              <p className="eyebrow text-olive">The story behind Sonique</p>
               <h2 className="mt-6 font-display text-[clamp(3.3rem,6.5vw,6.5rem)] leading-[0.9] tracking-[-0.045em]">
                 {text["story.heading"]}
               </h2>
