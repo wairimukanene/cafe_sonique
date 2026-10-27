@@ -15,10 +15,12 @@ import {
   MapPin,
   Menu,
   Music2,
+  ShoppingBag,
   Sparkles,
   UserRound,
 } from "lucide-react";
 
+import Image from "next/image";
 import { connection } from "next/server";
 
 import { BookingForm } from "@/components/marketing/booking-form";
@@ -34,6 +36,7 @@ import {
   getPublicThoughts,
   getPublicVideos,
 } from "@/lib/dal/content";
+import { getFeaturedShopProducts } from "@/lib/shop/dal";
 import { paragraphs } from "@/lib/site-text";
 
 const navLinks = [
@@ -41,6 +44,7 @@ const navLinks = [
   { href: "#room", label: "Read the room" },
   { href: "#events", label: "Events" },
   { href: "#menu", label: "Menu" },
+  { href: "/shop", label: "Shop" },
   { href: "#visit", label: "Visit" },
 ];
 
@@ -49,13 +53,14 @@ export const instant = false;
 
 export default async function Home() {
   await connection();
-  const [menuGroups, upcomingEvents, thoughts, photos, text, videos] = await Promise.all([
+  const [menuGroups, upcomingEvents, thoughts, photos, text, videos, shopProducts] = await Promise.all([
     getPublicMenu(),
     getPublicEvents(),
     getPublicThoughts(),
     getPublicPhotos(),
     getPublicSiteText(),
     getPublicVideos(),
+    getFeaturedShopProducts(),
   ]);
 
   const featuredMenus = [
@@ -394,6 +399,52 @@ export default async function Home() {
         </div>
       </section>
 
+      {shopProducts.length ? (
+        <section id="shop" className="paper-section py-24 text-ink md:py-32">
+          <div className="shell">
+            <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
+              <div>
+                <p className="eyebrow mb-5 text-olive">The Sonique shop</p>
+                <h2 className="font-display text-[clamp(3.3rem,6vw,6rem)] leading-[0.9] tracking-[-0.04em]">
+                  Take the room <em>home.</em>
+                </h2>
+                <p className="mt-6 max-w-md leading-7 text-ink/70">
+                  Mugs, tees and small keepsakes from the café. Pay with M-Pesa and collect at the bar, or get it delivered.
+                </p>
+              </div>
+              <a className="nav-pill nav-pill-dark inline-flex w-fit gap-2" href="/shop">
+                See all merchandise <ArrowRight size={16} />
+              </a>
+            </div>
+            <div className="mt-14 grid gap-5 md:grid-cols-3">
+              {shopProducts.map((product) => (
+                <a className="shop-feature" href={`/shop#${product.slug}`} key={product.id}>
+                  <div className="shop-photo">
+                    {product.imagePath ? (
+                      <Image
+                        src={product.imagePath}
+                        alt={product.imageAlt}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="photo-placeholder" role="img" aria-label={product.imageAlt}>
+                        <ShoppingBag size={36} strokeWidth={1} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3 p-5">
+                    <h3 className="font-display text-3xl leading-none">{product.name}</h3>
+                    <p className="whitespace-nowrap text-sm font-bold">KES {product.priceKes.toLocaleString("en-KE")}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section id="visit" className="bg-sage py-24 text-ink md:py-32">
         <div className="shell grid gap-14 lg:grid-cols-2">
           <div>
@@ -451,6 +502,7 @@ export default async function Home() {
             <a href="#story">Our story</a>
             <a href="#events">Events</a>
             <a href="#menu">Menu</a>
+            <a href="/shop">Shop</a>
             <a href="#visit">Visit</a>
             <a href="https://www.instagram.com/cafe_sonique/" target="_blank" rel="noreferrer">Instagram</a>
           </div>

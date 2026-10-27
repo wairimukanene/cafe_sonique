@@ -29,6 +29,20 @@
       "when": 1791617264794,
       "tag": "0003_romantic_harry_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793100787922,
+      "tag": "0004_right_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793104797511,
+      "tag": "0005_product_colours",
+      "breakpoints": true
     }
   ]
 }

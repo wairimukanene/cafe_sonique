@@ -42,9 +42,9 @@ export default async function MpesaPage() {
           <thead><tr><th>When</th><th>Receipt</th><th>Till</th><th>Amount</th></tr></thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={text(first(row, ["id", "reference"]), String(index))}>
-                <td>{dateTime(first(row, ["transactedAt", "createdAt"]))}</td>
-                <td>{text(first(row, ["receiptRef", "reference", "mpesaReceiptRef"]))}</td>
+              <tr key={text(first(row, ["paymentId", "id", "reference"]), String(index))}>
+                <td>{dateTime(first(row, ["recordedAt", "transactedAt", "createdAt"]))}</td>
+                <td>{text(first(row, ["receiptNumber", "receiptRef", "reference", "mpesaReceiptRef"]))}</td>
                 <td>{text(first(row, ["tillNumber"]))}</td>
                 <td>{money(first(row, ["amountKes"]))}</td>
               </tr>

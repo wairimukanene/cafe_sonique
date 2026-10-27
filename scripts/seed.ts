@@ -4,15 +4,20 @@ import { auth } from "../src/lib/auth-core";
 import { db } from "../src/lib/db/client";
 import {
   cafeSetting,
+  deliveryArea,
   event,
   expenseCategory,
   inventoryItem,
   mediaAsset,
   menuCategory,
   menuItem,
+  shopProduct,
+  shopProductColour,
+  shopProductOption,
   user,
 } from "../src/lib/db/schema";
 import { photoSlots } from "../src/lib/media/slots";
+import { DEFAULT_OPTION_LABEL, slugify } from "../src/lib/shop/domain";
 
 async function ensureStaff(
   name: string,
@@ -34,6 +39,12 @@ async function ensureStaff(
 }
 
 async function main() {
+  if (process.argv.includes("--shop-only")) {
+    await seedShop();
+    console.log("Shop products seeded.");
+    return;
+  }
+
   const ownerPassword = process.env.OWNER_PASSWORD;
   const baristaPassword = process.env.BARISTA_PASSWORD;
 
@@ -165,7 +176,136 @@ async function main() {
     ])
     .onConflictDoNothing();
 
+  await seedShop();
+
   console.log("Café Sonique database seeded.");
+}
+
+const placeholderProducts = [
+  {
+    id: "shop-tee",
+    name: "Sonique tee",
+    slug: "sonique-tee",
+    description: "White cotton tee with the orange Sonique wordmark on the chest. The one our baristas wear behind the bar.",
+    priceKes: 2500,
+    imagePath: "/images/shop/tee-barista.jpg",
+    imageAlt: "Sonique barista behind the bar wearing the white tee with the orange Sonique wordmark",
+    featured: true,
+    colours: [
+      {
+        name: "White",
+        imagePath: "/images/shop/tee-barista.jpg",
+        imageAlt: "Sonique barista wearing the white tee with the orange Sonique wordmark",
+        options: ["S", "M", "L", "XL"].map((label) => ({ label, stock: 8 })),
+      },
+      {
+        name: "Black",
+        imagePath: "/images/shop/tee-black.jpg",
+        imageAlt: "Black Sonique tee with the orange wordmark, laid flat on the counter",
+        options: ["S", "M", "L", "XL"].map((label) => ({ label, stock: 5 })),
+      },
+    ],
+  },
+  {
+    id: "shop-mug",
+    name: "Sonique mug",
+    slug: "sonique-mug",
+    description: "The same cup we pour your flat white into.",
+    priceKes: 1200,
+    imagePath: "/images/shop/mug.jpg",
+    imageAlt: "Ceramic Sonique coffee mug",
+    featured: true,
+    colours: [
+      {
+        name: "White",
+        imagePath: "/images/shop/mug.jpg",
+        imageAlt: "White ceramic Sonique mug with the green logo",
+        options: [{ label: DEFAULT_OPTION_LABEL, stock: 20 }],
+      },
+      {
+        name: "Black",
+        imagePath: "/images/shop/mug-black.jpg",
+        imageAlt: "Matte black Sonique mug with the green logo",
+        options: [{ label: DEFAULT_OPTION_LABEL, stock: 12 }],
+      },
+    ],
+  },
+  {
+    id: "shop-keyholder",
+    name: "Keyholder",
+    slug: "keyholder",
+    description: "Enamel and brass, so your keys always come back to the room.",
+    priceKes: 600,
+    imagePath: "/images/shop/keyholder.jpg",
+    imageAlt: "Enamel and brass Sonique keyholder",
+    featured: true,
+    options: [{ label: DEFAULT_OPTION_LABEL, stock: 25 }],
+  },
+  {
+    id: "shop-game-cards",
+    name: "Sonique game cards",
+    slug: "game-cards",
+    description: "Our orange deck of game cards on a ring. Pass them round the table over coffee.",
+    priceKes: 800,
+    imagePath: "/images/shop/game-cards.jpg",
+    imageAlt: "A hand holding the orange Sonique game cards on a ring",
+    featured: false,
+    options: [{ label: DEFAULT_OPTION_LABEL, stock: 30 }],
+  },
+  {
+    id: "shop-stickers",
+    name: "Sticker pack",
+    slug: "sticker-pack",
+    description: "Five die-cut stickers for laptops and bottles.",
+    priceKes: 400,
+    imagePath: "/images/shop/stickers.jpg",
+    imageAlt: "Pack of five Sonique die-cut stickers",
+    featured: false,
+    options: [{ label: DEFAULT_OPTION_LABEL, stock: 40 }],
+  },
+];
+
+async function seedShop() {
+  const [{ products }] = await db.select({ products: sql<number>`count(*)::int` }).from(shopProduct);
+  if (products === 0) {
+    for (const [index, entry] of placeholderProducts.entries()) {
+      const { colours = [], options = [], ...product } = entry;
+      await db.insert(shopProduct).values({ ...product, sortOrder: index });
+      const variants = colours.length
+        ? colours.map(({ options: colourOptions, ...colour }) => ({
+            colourId: `${product.id}-${slugify(colour.name)}`,
+            colour,
+            options: colourOptions,
+          }))
+        : [{ colourId: null, colour: null, options }];
+      let sortOrder = 0;
+      for (const [colourIndex, variant] of variants.entries()) {
+        if (variant.colour && variant.colourId) {
+          await db.insert(shopProductColour).values({
+            id: variant.colourId,
+            productId: product.id,
+            sortOrder: colourIndex,
+            ...variant.colour,
+          });
+        }
+        await db.insert(shopProductOption).values(
+          variant.options.map((option) => ({
+            id: `${variant.colourId ?? product.id}-${slugify(option.label)}`,
+            productId: product.id,
+            colourId: variant.colourId,
+            label: option.label,
+            stock: option.stock,
+            sortOrder: sortOrder++,
+          })),
+        );
+      }
+    }
+  }
+
+  const [{ areas }] = await db.select({ areas: sql<number>`count(*)::int` }).from(deliveryArea);
+  if (areas === 0) {
+    await db.insert(deliveryArea).values({ id: "area-westlands", name: "Westlands & Parklands", feeKes: 250 });
+  }
 }
 
 main()

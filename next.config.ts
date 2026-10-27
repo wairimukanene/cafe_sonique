@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   devIndicators: false,
+  experimental: {
+    serverActions: {
+      // A product save can carry the main photo plus one photo per colour, each up to ~950 KB.
+      bodySizeLimit: "12mb",
+    },
+  },
   images: {
     // Optimised images can't be invalidated, so a replaced photo needs a new file name.
     minimumCacheTTL: 604800,

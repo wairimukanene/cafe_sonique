@@ -10,6 +10,7 @@ import {
   Images,
   MessageSquareText,
   PenLine,
+  ShoppingBag,
   UtensilsCrossed,
 } from "lucide-react";
 
@@ -19,6 +20,7 @@ const links = [
   { href: "/admin/words", label: "Words", icon: PenLine },
   { href: "/admin/menu", label: "Menu", icon: UtensilsCrossed },
   { href: "/admin/events", label: "Events", icon: CalendarDays },
+  { href: "/admin/shop", label: "Shop", icon: ShoppingBag },
   { href: "/admin/bookings", label: "Bookings", icon: ClipboardList },
   { href: "/admin/thoughts", label: "Guest thoughts", icon: MessageSquareText },
 ];

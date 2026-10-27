@@ -10,6 +10,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
@@ -676,5 +677,227 @@ export const recipeLineRelations = relations(recipeLine, ({ one }) => ({
   menuItem: one(menuItem, {
     fields: [recipeLine.menuItemId],
     references: [menuItem.id],
+  }),
+}));
+
+export const shopOrderStatus = pgEnum("shop_order_status", [
+  "awaiting_payment",
+  "paid",
+  "ready_for_pickup",
+  "out_for_delivery",
+  "completed",
+  "expired",
+  "cancelled",
+]);
+export const shopFulfilment = pgEnum("shop_fulfilment", ["pickup", "delivery"]);
+export const shopPaymentAttemptStatus = pgEnum("shop_payment_attempt_status", [
+  "pending",
+  "succeeded",
+  "failed",
+]);
+
+export const shopProduct = pgTable(
+  "shop_product",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    description: text("description").notNull(),
+    priceKes: integer("price_kes").notNull(),
+    imagePath: text("image_path"),
+    imageAlt: text("image_alt").notNull().default(""),
+    featured: boolean("featured").default(false).notNull(),
+    active: boolean("active").default(true).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("shop_product_slug_unique").on(table.slug),
+    check("shop_product_price_valid", sql`${table.priceKes} > 0`),
+  ],
+);
+
+export const shopProductColour = pgTable(
+  "shop_product_colour",
+  {
+    id: text("id").primaryKey(),
+    productId: text("product_id")
+      .notNull()
+      .references(() => shopProduct.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    imagePath: text("image_path"),
+    imageAlt: text("image_alt").notNull().default(""),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("shop_colour_product_name_unique").on(table.productId, table.name)],
+);
+
+export const shopProductOption = pgTable(
+  "shop_product_option",
+  {
+    id: text("id").primaryKey(),
+    productId: text("product_id")
+      .notNull()
+      .references(() => shopProduct.id, { onDelete: "cascade" }),
+    colourId: text("colour_id").references(() => shopProductColour.id, { onDelete: "cascade" }),
+    label: text("label").notNull(),
+    stock: integer("stock").default(0).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    unique("shop_option_variant_unique").on(table.productId, table.colourId, table.label).nullsNotDistinct(),
+    check("shop_option_stock_valid", sql`${table.stock} >= 0`),
+  ],
+);
+
+export const deliveryArea = pgTable(
+  "delivery_area",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    feeKes: integer("fee_kes").notNull(),
+    active: boolean("active").default(true).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [check("delivery_area_fee_valid", sql`${table.feeKes} >= 0`)],
+);
+
+export const shopOrder = pgTable(
+  "shop_order",
+  {
+    id: text("id").primaryKey(),
+    code: text("code").notNull(),
+    publicToken: text("public_token").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    status: shopOrderStatus("status").default("awaiting_payment").notNull(),
+    fulfilment: shopFulfilment("fulfilment").notNull(),
+    deliveryAreaId: text("delivery_area_id").references(() => deliveryArea.id, {
+      onDelete: "set null",
+    }),
+    deliveryAreaName: text("delivery_area_name"),
+    deliveryAddress: text("delivery_address"),
+    deliveryNotes: text("delivery_notes"),
+    customerName: text("customer_name").notNull(),
+    phoneE164: text("phone_e164").notNull(),
+    itemsTotalKes: integer("items_total_kes").notNull(),
+    deliveryFeeKes: integer("delivery_fee_kes").default(0).notNull(),
+    totalKes: integer("total_kes").notNull(),
+    holdExpiresAt: timestamp("hold_expires_at", { withTimezone: true }).notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    mpesaReceipt: text("mpesa_receipt"),
+    saleId: text("sale_id").references(() => sale.id, { onDelete: "set null" }),
+    needsAttention: text("needs_attention"),
+    cancelReason: text("cancel_reason"),
+    statusChangedAt: timestamp("status_changed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("shop_order_code_unique").on(table.code),
+    uniqueIndex("shop_order_token_unique").on(table.publicToken),
+    uniqueIndex("shop_order_idempotency_unique").on(table.idempotencyKey),
+    index("shop_order_status_created_idx").on(table.status, table.createdAt),
+    index("shop_order_hold_idx").on(table.status, table.holdExpiresAt),
+    check(
+      "shop_order_totals_valid",
+      sql`${table.itemsTotalKes} > 0 and ${table.deliveryFeeKes} >= 0 and ${table.totalKes} = ${table.itemsTotalKes} + ${table.deliveryFeeKes}`,
+    ),
+  ],
+);
+
+export const shopOrderItem = pgTable(
+  "shop_order_item",
+  {
+    id: text("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => shopOrder.id, { onDelete: "cascade" }),
+    productId: text("product_id").references(() => shopProduct.id, { onDelete: "set null" }),
+    optionId: text("option_id").references(() => shopProductOption.id, {
+      onDelete: "set null",
+    }),
+    nameSnapshot: text("name_snapshot").notNull(),
+    optionLabel: text("option_label"),
+    unitPriceKes: integer("unit_price_kes").notNull(),
+    quantity: integer("quantity").notNull(),
+    lineTotalKes: integer("line_total_kes").notNull(),
+  },
+  (table) => [
+    index("shop_order_item_order_idx").on(table.orderId),
+    check(
+      "shop_order_item_values_valid",
+      sql`${table.quantity} > 0 and ${table.unitPriceKes} > 0 and ${table.lineTotalKes} = ${table.quantity} * ${table.unitPriceKes}`,
+    ),
+  ],
+);
+
+export const shopPaymentAttempt = pgTable(
+  "shop_payment_attempt",
+  {
+    id: text("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => shopOrder.id, { onDelete: "cascade" }),
+    checkoutRequestId: text("checkout_request_id").notNull(),
+    merchantRequestId: text("merchant_request_id"),
+    phoneE164: text("phone_e164").notNull(),
+    amountKes: integer("amount_kes").notNull(),
+    status: shopPaymentAttemptStatus("status").default("pending").notNull(),
+    resultCode: integer("result_code"),
+    resultDesc: text("result_desc"),
+    mpesaReceipt: text("mpesa_receipt"),
+    callbackPayload: jsonb("callback_payload").$type<Record<string, unknown>>(),
+    lastQueriedAt: timestamp("last_queried_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("shop_payment_checkout_unique").on(table.checkoutRequestId),
+    index("shop_payment_order_idx").on(table.orderId, table.createdAt),
+  ],
+);
+
+export const shopProductRelations = relations(shopProduct, ({ many }) => ({
+  options: many(shopProductOption),
+  colours: many(shopProductColour),
+}));
+
+export const shopProductColourRelations = relations(shopProductColour, ({ one, many }) => ({
+  product: one(shopProduct, {
+    fields: [shopProductColour.productId],
+    references: [shopProduct.id],
+  }),
+  options: many(shopProductOption),
+}));
+
+export const shopProductOptionRelations = relations(shopProductOption, ({ one }) => ({
+  product: one(shopProduct, {
+    fields: [shopProductOption.productId],
+    references: [shopProduct.id],
+  }),
+  colour: one(shopProductColour, {
+    fields: [shopProductOption.colourId],
+    references: [shopProductColour.id],
+  }),
+}));
+
+export const shopOrderRelations = relations(shopOrder, ({ many, one }) => ({
+  items: many(shopOrderItem),
+  attempts: many(shopPaymentAttempt),
+  sale: one(sale, { fields: [shopOrder.saleId], references: [sale.id] }),
+}));
+
+export const shopOrderItemRelations = relations(shopOrderItem, ({ one }) => ({
+  order: one(shopOrder, { fields: [shopOrderItem.orderId], references: [shopOrder.id] }),
+}));
+
+export const shopPaymentAttemptRelations = relations(shopPaymentAttempt, ({ one }) => ({
+  order: one(shopOrder, {
+    fields: [shopPaymentAttempt.orderId],
+    references: [shopOrder.id],
   }),
 }));
