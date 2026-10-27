@@ -196,17 +196,11 @@ export default async function Home() {
 
       <section id="menu" className="bg-ink py-24 text-cream md:py-36">
         <div className="shell">
-          <div className="mb-16 flex flex-col justify-between gap-8 md:flex-row md:items-end">
-            <div>
-              <p className="eyebrow mb-5 text-sage">On the menu</p>
-              <h2 className="font-display text-6xl leading-none tracking-tight md:text-8xl">
-                Coffee with <em>range.</em>
-              </h2>
-            </div>
-            <p className="max-w-sm text-sm leading-6 text-cream/60">
-              A small, considered menu. Prices shown are provisional and will be
-              confirmed with the café before launch.
-            </p>
+          <div className="mb-16">
+            <p className="eyebrow mb-5 text-sage">On the menu</p>
+            <h2 className="font-display text-6xl leading-none tracking-tight md:text-8xl">
+              Coffee, tea <em>&amp; more.</em>
+            </h2>
           </div>
 
           <div className="grid gap-px overflow-hidden bg-cream/15 lg:grid-cols-3">
