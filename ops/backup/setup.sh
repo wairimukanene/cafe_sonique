@@ -11,9 +11,13 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-if ! command -v rclone >/dev/null; then
+# Distribution packages can predate rclone's Cloudflare R2 support, so install the official build.
+if ! rclone help backend s3 2>/dev/null | grep -q Cloudflare; then
   echo "Installing rclone…"
-  apt-get update -qq && apt-get install -y -qq rclone
+  tmp="$(mktemp -d)"
+  curl -fsSL -o "$tmp/rclone.deb" https://downloads.rclone.org/rclone-current-linux-amd64.deb </dev/null
+  dpkg -i "$tmp/rclone.deb" </dev/null >/dev/null
+  rm -rf "$tmp"
 fi
 
 echo
