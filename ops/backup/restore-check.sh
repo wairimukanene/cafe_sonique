@@ -10,7 +10,7 @@ CHECK_DB=cafe_sonique_restore_check
 
 cd "$APP_DIR"
 work="$(mktemp -d)"
-psql() { docker compose exec -T postgres psql -U sonique -v ON_ERROR_STOP=1 -qtA "$@"; }
+psql() { docker compose exec -T postgres psql -U sonique -v ON_ERROR_STOP=1 -qtA "$@" </dev/null; }
 cleanup() {
   psql -d postgres -c "drop database if exists $CHECK_DB" >/dev/null || true
   rm -rf "$work"
