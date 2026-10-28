@@ -26,6 +26,7 @@ services:
       - "127.0.0.1:${APP_PORT:-3000}:3000"
     volumes:
       - sonique_media:/app/.data/media
+      - sonique_receipts:/app/.data/receipts
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,3 +47,4 @@ services:
 volumes:
   sonique_postgres:
   sonique_media:
+  sonique_receipts:

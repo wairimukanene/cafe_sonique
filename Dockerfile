@@ -23,7 +23,7 @@ ENV NODE_ENV=production \
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
-RUN mkdir -p .data/media && chown -R node:node .data
+RUN mkdir -p .data/media .data/receipts && chown -R node:node .data
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]

@@ -1,0 +1,10 @@
+[Unit]
+Description=Back up Cafe Sonique database and media to Cloudflare R2
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/cafe_sonique/ops/backup/backup.sh
+Nice=10
+IOSchedulingClass=idle

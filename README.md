@@ -108,9 +108,19 @@ bucket (for example Cloudflare R2) and add its domain to
 
 ## Backups and deployment
 
-For production, use managed PostgreSQL with automated daily backups and
-point-in-time recovery. Test restoration into a non-production database before
-launch and periodically thereafter.
+On the self-hosted server, `ops/backup/backup.sh` runs nightly at 03:00
+(Nairobi) from a systemd timer. It dumps PostgreSQL and copies uploaded media
+and expense receipts to a Cloudflare R2 bucket through an rclone `crypt`
+remote, so files are encrypted before upload. Database dumps are kept for 30
+days in R2 and 7 days in `/var/backups/sonique`.
+
+- Set up once as root with `ops/backup/setup.sh`. It asks for the R2 key and
+  prints the encryption password once; store that password offline, because
+  backups cannot be opened without it.
+- Run a backup now with `systemctl start sonique-backup`; read the log with
+  `journalctl -u sonique-backup`.
+- Prove a restore works with `ops/backup/restore-check.sh`, which restores the
+  latest dump into a throwaway database and compares row counts with live.
 
 Deployment requires:
 
